@@ -1,0 +1,9 @@
+# deps & builds
+node_modules/
+dist/
+build/
+
+# env & system
+.env
+.DS_Store
+Thumbs.db
