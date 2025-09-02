@@ -1,5 +1,5 @@
 import { type RootState } from "../../app/store";
-import type { CartItem } from "./cartSlice"; // 👈 نوع رو ایمپورت کن
+import type { CartItem } from "../../store/cartSlice"; // 👈 نوع رو ایمپورت کن
 
 export const selectCartItems = (state: RootState) => state.cart.items;
 

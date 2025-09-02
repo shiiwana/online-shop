@@ -1,43 +1,69 @@
-import { useState } from "react"
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 
-const mockCart = [
-  { id: 1, name: "Product 1", price: 100, quantity: 2 },
-  { id: 2, name: "Product 2", price: 200, quantity: 1 },
-]
+import { increment, decrement, removeItem, selectCartItems, selectCartCount, selectCartTotal } from "../store/cartSlice";
+
+const currency = new Intl.NumberFormat("fa-IR", { style: "currency", currency: "USD" });
 
 export default function CartPage() {
-  const [cart, setCart] = useState(mockCart)
+  const dispatch = useAppDispatch();
+  const items = useAppSelector(selectCartItems);
+  const totalQty = useAppSelector(selectCartCount);
+  const totalPrice = useAppSelector(selectCartTotal);
 
-  const increaseQuantity = (id: number) => {
-    setCart(cart.map(item => item.id === id ? {...item, quantity: item.quantity + 1} : item))
+
+  if (items.length === 0) {
+    return (
+      <div style={{ padding: 16 }}>
+        <h2>سبد شما خالی است</h2>
+      </div>
+    );
   }
-
-  const decreaseQuantity = (id: number) => {
-    setCart(cart.map(item => item.id === id && item.quantity > 1 ? {...item, quantity: item.quantity - 1} : item))
-  }
-
-  const removeItem = (id: number) => {
-    setCart(cart.filter(item => item.id !== id))
-  }
-
-
-  
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   return (
-    <div>
-      <h1>Cart</h1>
-      {cart.map(item => (
-        <div key={item.id}>
-          <span>{item.name}</span>
-          <span> x {item.quantity}</span>
-          <span>Price: {item.price}</span>
-          <button onClick={() => increaseQuantity(item.id)}>+</button>
-          <button onClick={() => decreaseQuantity(item.id)}>-</button>
-          <button onClick={() => removeItem(item.id)}>Remove</button>
+    <div style={{ padding: 16 }}>
+      <h1>سبد خرید</h1>
+
+      {items.map((it) => (
+        <div
+          key={it.id}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            border: "1px solid #eee",
+            padding: 12,
+            margin: "8px 0",
+            borderRadius: 8,
+          }}
+        >
+          <img
+            src={it.image || "https://via.placeholder.com/64"}
+            alt={it.title}
+            style={{ width: 64, height: 64, objectFit: "contain" }}
+          />
+
+          <div style={{ flex: 1 }}>
+            <div>{it.title}</div>
+            <div>قیمت واحد: {currency.format(it.price)}</div>
+
+
+            <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 6 }}>
+              <button onClick={() => dispatch(decrement(it.id))} disabled={it.quantity <= 1}>-</button>
+              <span style={{ minWidth: 24, textAlign: "center" }}>{it.quantity}</span>
+              <button onClick={() => dispatch(increment(it.id))}>+</button>
+              <button onClick={() => dispatch(removeItem(it.id))} style={{ marginInlineStart: 12 }}>حذف</button>
+            </div>
+          </div>
+
+          <div style={{ marginInlineStart: "auto" }}>
+            <b>{currency.format(it.price * it.quantity)}</b>
+          </div>
         </div>
       ))}
-      <h2>Total: {total}</h2>
+
+      <hr />
+      <p>تعداد اقلام: {totalQty}</p>
+      <h3>جمع کل: {currency.format(totalPrice)}</h3>
     </div>
-  )
+  );
 }
