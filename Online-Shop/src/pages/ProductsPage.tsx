@@ -17,7 +17,8 @@ export default function ProductsPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://api.escuelajs.co/api/v1/products?offset=0&limit=12")
+    fetch("/api/products?offset=0&limit=12")
+
       .then((res) => res.json())
       .then((data) => setProducts(data))
       .catch((err) => setError(err.message))
