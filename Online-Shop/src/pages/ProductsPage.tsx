@@ -1,29 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch } from "../store/hooks";
 import { addItem } from "../store/cartSlice";
 
-type Product = { id: number | string; name: string; price: number };
-
-const mockProducts: Product[] = [
-  { id: 1, name: "Product 1", price: 100 },
-  { id: 2, name: "Product 2", price: 200 },
-];
+type Product = {
+  id: number | string;
+  title: string;
+  price: number;
+  images?: string[];
+};
 
 export default function ProductsPage() {
-  const [products] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const dispatch = useAppDispatch();
 
-  const addToCart = (p: Product) => {
-  
-    dispatch(
-      addItem({
-        id: p.id,
-        title: p.name,
-        price: p.price,
-        image: "",
-      })
-    );
-  };
+  useEffect(() => {
+    setLoading(true);
+    fetch("/api/products?offset=0&limit=12")
+
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p>در حال بارگذاری...</p>;
+  if (error) return <p>خطا: {error}</p>;
 
   return (
     <div style={{ padding: 16 }}>
@@ -42,9 +45,22 @@ export default function ProductsPage() {
               borderRadius: 8,
             }}
           >
-            <span style={{ flex: 1 }}>{p.name}</span>
+            <span style={{ flex: 1 }}>{p.title}</span>
             <span>Price: {p.price}</span>
-            <button onClick={() => addToCart(p)}>Add to Cart</button>
+            <button
+              onClick={() =>
+                dispatch(
+                  addItem({
+                    id: p.id,
+                    title: p.title,
+                    price: p.price,
+                    image: p.images?.[0] ?? "",
+                  })
+                )
+              }
+            >
+              Add to Cart
+            </button>
           </li>
         ))}
       </ul>
